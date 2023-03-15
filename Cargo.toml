@@ -11,3 +11,4 @@ serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.5"
 typed-builder = "0.14"
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"

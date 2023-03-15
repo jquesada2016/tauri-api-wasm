@@ -1,5 +1,6 @@
 mod logical_position;
 mod logical_size;
+mod monitor;
 mod physical_position;
 mod physical_size;
 mod webview_window;
@@ -7,6 +8,7 @@ mod window_manager;
 
 pub use logical_position::*;
 pub use logical_size::*;
+pub use monitor::*;
 pub use physical_position::*;
 pub use physical_size::*;
 use wasm_bindgen::prelude::*;
@@ -31,7 +33,7 @@ pub enum UserAttentionType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize)]
 pub enum Theme {
   Light = "light",
-  Dark = "Dark",
+  Dark = "dark",
 }
 
 /// The style of the macOS title bar.
@@ -41,4 +43,101 @@ pub enum TitleBarStyle {
   Visible = "visible",
   Transparent = "transparent",
   Overlay = "overlay",
+}
+
+#[wasm_bindgen]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum CursorIcon {
+  Default = "default",
+  Crosshair = "crosshair",
+  Hand = "hand",
+  Arrow = "arrow",
+  Move = "move",
+  Text = "text",
+  Wait = "wait",
+  Help = "help",
+  Progress = "progress",
+  NotAllowed = "notAllowed",
+  ContextMenu = "contextMenu",
+  Cell = "cell",
+  VerticalText = "verticalText",
+  Alias = "alias",
+  Copy = "copy",
+  NoDrop = "noDrop",
+  Grab = "grab",
+  Grabbing = "grabbing",
+  AllScroll = "allScroll",
+  ZoomIn = "zoomIn",
+  ZoomOut = "zoomOut",
+  EResize = "eResize",
+  NResize = "nResize",
+  NEResize = "neResize",
+  NWResize = "nwResize",
+  SResize = "sResize",
+  SEResize = "seResize",
+  SWResize = "swResize",
+  WResize = "wResize",
+  EWResize = "ewResize",
+  NSResize = "nsResize",
+  NESWResize = "neswResize",
+  NWSEResize = "nwseResize",
+  ColResize = "colResize",
+  RowResize = "rowResize",
+}
+
+/// Returns the list of all the monitors available on the system.
+pub async fn available_monitors() -> Vec<Monitor> {
+  available_monitors_js()
+    .await
+    .unchecked_into::<js_sys::Array>()
+    .values()
+    .into_iter()
+    .map(|v| v.unwrap())
+    .map(|monitor| monitor.unchecked_into())
+    .collect()
+}
+
+/// Returns the monitor on which the window currently resides. Returns null if current monitor can't be detected.
+pub async fn current_monitor() -> Option<Monitor> {
+  let monitor = current_monitor_js().await;
+
+  if monitor.is_null() {
+    None
+  } else {
+    Some(monitor.unchecked_into::<Monitor>())
+  }
+}
+
+/// Returns the primary monitor of the system. Returns null if it can't identify any monitor as a primary one.
+pub async fn primary_monitor() -> Option<Monitor> {
+  let monitor = primary_monitor_js().await;
+
+  if monitor.is_null() {
+    None
+  } else {
+    Some(monitor.unchecked_into::<Monitor>())
+  }
+}
+
+#[wasm_bindgen]
+extern "C" {
+  #[wasm_bindgen(js_name = appWindow, js_namespace = ["__TAURI__", "window"])]
+  pub static APP_WINDOW: WebviewWindow;
+
+  #[wasm_bindgen(js_name = availableMonitors, js_namespace = ["__TAURI__", "window"])]
+  async fn available_monitors_js() -> JsValue;
+
+  #[wasm_bindgen(js_name = currentMonitor, js_namespace = ["__TAURI__", "window"])]
+  async fn current_monitor_js() -> JsValue;
+
+  /// Gets a list of instances of WebviewWindow for all available webview windows.
+  #[wasm_bindgen(js_name = getAll, js_namespace = ["__TAURI__", "window"])]
+  pub fn get_all() -> Vec<WebviewWindow>;
+
+  /// Get an instance of WebviewWindow for the current webview window.
+  #[wasm_bindgen(js_name = getCurrent, js_namespace = ["__TAURI__", "window"])]
+  pub fn get_current() -> WebviewWindow;
+
+  #[wasm_bindgen(js_name = primaryMonitor, js_namespace = ["__TAURI__", "window"])]
+  async fn primary_monitor_js() -> JsValue;
 }
