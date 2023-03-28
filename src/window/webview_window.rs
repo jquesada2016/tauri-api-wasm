@@ -116,7 +116,6 @@ impl WebviewWindow {
 
 #[wasm_bindgen]
 extern "C" {
-
   /// Create new webview windows and get a handle to existing ones.
   ///
   /// Windows are identified by a label a unique identifier that can be used to reference it later. It may only contain alphanumeric characters a-zA-Z plus the following special characters -, /, : and _.
@@ -125,4 +124,7 @@ extern "C" {
 
   #[wasm_bindgen(constructor, js_namespace = ["__TAURI__", "window"])]
   fn new_js(label: &str, options: JsValue) -> WebviewWindow;
+
+  #[wasm_bindgen(static_method_of = WebviewWindow, js_name = getByLabel, js_namespace = ["__TAURI__", "window"])]
+  pub fn get_by_label(label: &str) -> Option<WebviewWindow>;
 }

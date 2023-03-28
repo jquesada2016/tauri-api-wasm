@@ -3,6 +3,7 @@ mod logical_size;
 mod monitor;
 mod physical_position;
 mod physical_size;
+mod web_view_window_handle;
 mod webview_window;
 mod window_manager;
 
@@ -14,6 +15,44 @@ pub use physical_size::*;
 use wasm_bindgen::prelude::*;
 pub use webview_window::*;
 pub use window_manager::*;
+
+pub const WINDOW_RESIZED: &str = "tauri://resize";
+pub const WINDOW_MOVED: &str = "tauri://move";
+pub const WINDOW_CLOSE_REQUESTED: &str = "tauri://close-requested";
+pub const WINDOW_CREATED: &str = "tauri://window-created";
+pub const WINDOW_DESTROYED: &str = "tauri://destroyed";
+pub const WINDOW_FOCUS: &str = "tauri://focus";
+pub const WINDOW_BLUR: &str = "tauri://blur";
+pub const WINDOW_SCALE_FACTOR_CHANGED: &str = "tauri://scale-change";
+pub const WINDOW_THEME_CHANGED: &str = "tauri://theme-changed";
+pub const WINDOW_FILE_DROP: &str = "tauri://file-drop";
+pub const WINDOW_FILE_DROP_HOVER: &str = "tauri://file-drop-hover";
+pub const WINDOW_FILE_DROP_CANCELLED: &str = "tauri://file-drop-cancelled";
+pub const MENU: &str = "tauri://menu";
+pub const CHECK_UPDATE: &str = "tauri://update";
+pub const UPDATE_AVAILABLE: &str = "tauri://update-available";
+pub const INSTALL_UPDATE: &str = "tauri://update-install";
+pub const STATUS_UPDATE: &str = "tauri://update-status";
+pub const DOWNLOAD_PROGRESS: &str = "tauri://update-download-progress";
+
+declare_type! {
+  pub struct Event {
+    pub event: String,
+    pub windowLabel: String,
+    pub id: js_sys::Number,
+    pub payload: JsValue,
+  }
+
+  impl Event {}
+}
+
+pub struct Unsubscribe<T: ?Sized>(Closure<T>, js_sys::Function);
+
+impl<T: ?Sized> Drop for Unsubscribe<T> {
+  fn drop(&mut self) {
+    let _ = self.1.call0(&JsValue::UNDEFINED);
+  }
+}
 
 /// Attention type to request on a window.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

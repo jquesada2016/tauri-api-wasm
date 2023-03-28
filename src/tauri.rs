@@ -79,12 +79,20 @@ impl<Args, Res> InvokeCommand<Args, Res, JsValue> {
 
 impl InvokeCommand<(), (), ()> {
   pub async fn invoke(self) {
-    let _ = invoke_js(self.name, JsValue::UNDEFINED).await;
+    invoke_js(self.name, JsValue::UNDEFINED)
+      .await
+      .unwrap_or_else(|err| {
+        panic!("`{}` invocation not to return `Err`: {err:#?}", self.name)
+      });
   }
 
   pub fn invoke_sync(self) {
     wasm_bindgen_futures::spawn_local(async move {
-      let _ = invoke_js(self.name, JsValue::UNDEFINED).await;
+      invoke_js(self.name, JsValue::UNDEFINED)
+        .await
+        .unwrap_or_else(|err| {
+          panic!("`{}` invocation not to return `Err`: {err:#?}", self.name)
+        });
     });
   }
 }
@@ -105,7 +113,7 @@ extern "C" {
   #[wasm_bindgen(js_name = convertFileSrc, js_namespace = ["__TAURI__", "tauri"])]
   pub fn convert_ile_src(file_path: &str, protocol: Option<&str>) -> String;
 
-  #[wasm_bindgen(js_namespace = ["__TAURI__", "tauri"], catch)]
+  #[wasm_bindgen(js_name = invoke, js_namespace = ["__TAURI__", "tauri"], catch)]
   async fn invoke_js(cmd: &str, args: JsValue) -> Result<JsValue, JsValue>;
 
   /// Transforms a callback function to a string identifier that can be passed to the backend. The backend uses the identifier to eval() the callback.
