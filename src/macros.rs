@@ -54,7 +54,7 @@ macro_rules! declare_type {
               $( $async_arg: $async_arg_ty ),*
             ) $( -> $async_method_output )? {
               let _value = self
-                .[<$async_method:snake __js>]($( $async_arg: $async_arg_ty ),*)
+                .[<$async_method:snake __js>]($( $async_arg ),*)
                 .await;
 
               $(
@@ -73,7 +73,7 @@ macro_rules! declare_type {
               $( $async_catch_arg: $async_catch_arg_ty ),*
             ) -> Result<$async_catch_method_output_ok, $async_catch_method_output_err> {
               self
-                .[<$async_catch_method:snake __js>]($( $async_catch_arg: $async_catch_arg_ty ),*)
+                .[<$async_catch_method:snake __js>]($( $async_catch_arg ),*)
                 .await
                 .map(|ok| ok.unchecked_into())
                 .map_err(|err| err.unchecked_into())
