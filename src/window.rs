@@ -35,25 +35,6 @@ pub const INSTALL_UPDATE: &str = "tauri://update-install";
 pub const STATUS_UPDATE: &str = "tauri://update-status";
 pub const DOWNLOAD_PROGRESS: &str = "tauri://update-download-progress";
 
-declare_type! {
-  pub struct Event {
-    pub event: String,
-    pub windowLabel: String,
-    pub id: js_sys::Number,
-    pub payload: JsValue,
-  }
-
-  impl Event {}
-}
-
-pub struct Unsubscribe<T: ?Sized>(Closure<T>, js_sys::Function);
-
-impl<T: ?Sized> Drop for Unsubscribe<T> {
-  fn drop(&mut self) {
-    let _ = self.1.call0(&JsValue::UNDEFINED);
-  }
-}
-
 /// Attention type to request on a window.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[wasm_bindgen]

@@ -1,6 +1,6 @@
-use super::{
+use crate::event::{
   Event,
-  Unsubscribe,
+  ListenUnsubscriber,
 };
 use wasm_bindgen::prelude::*;
 
@@ -18,7 +18,7 @@ impl WebviewWindowHandle {
     &self,
     event: &str,
     handler: impl FnMut(Event) + 'static,
-  ) -> Unsubscribe<dyn FnMut(Event)> {
+  ) -> ListenUnsubscriber<dyn FnMut(Event)> {
     #[wasm_bindgen]
     extern "C" {
       #[wasm_bindgen(js_name = listen, method)]
@@ -36,14 +36,14 @@ impl WebviewWindowHandle {
       .await
       .unchecked_into();
 
-    Unsubscribe(closure, unsub)
+    ListenUnsubscriber(closure, unsub)
   }
 
   pub async fn listen_serde<T: for<'de> serde::Deserialize<'de>>(
     &self,
     event: &str,
     mut handler: impl FnMut(Result<T, serde_wasm_bindgen::Error>, Event) + 'static,
-  ) -> Unsubscribe<dyn FnMut(Event)> {
+  ) -> ListenUnsubscriber<dyn FnMut(Event)> {
     self
       .listen(event, move |e| {
         let payload = e.payload();
@@ -59,7 +59,7 @@ impl WebviewWindowHandle {
     &self,
     event: &str,
     handler: impl FnOnce(Event) + 'static,
-  ) -> Unsubscribe<dyn FnMut(Event)> {
+  ) -> ListenUnsubscriber<dyn FnMut(Event)> {
     #[wasm_bindgen]
     extern "C" {
       #[wasm_bindgen(js_name = once, method)]
@@ -74,14 +74,14 @@ impl WebviewWindowHandle {
 
     let unsub = self.once_js(event, closure.as_ref()).await.unchecked_into();
 
-    Unsubscribe(closure, unsub)
+    ListenUnsubscriber(closure, unsub)
   }
 
   pub async fn once_serde<T: for<'de> serde::Deserialize<'de>>(
     &self,
     event: &str,
     handler: impl FnOnce(Result<T, serde_wasm_bindgen::Error>, Event) + 'static,
-  ) -> Unsubscribe<dyn FnMut(Event)> {
+  ) -> ListenUnsubscriber<dyn FnMut(Event)> {
     self
       .once(event, move |e| {
         let payload = serde_wasm_bindgen::from_value(e.payload());
