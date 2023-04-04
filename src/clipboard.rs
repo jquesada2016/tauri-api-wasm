@@ -1,17 +1,16 @@
 use wasm_bindgen::prelude::*;
 
 /// Gets the clipboard content as plain text.
-pub async fn read_text() -> String {
+pub async fn read_text() -> Option<String> {
   #[wasm_bindgen]
   extern "C" {
     #[wasm_bindgen(js_name = readText, js_namespace = ["__TAURI__", "clipboard"])]
     async fn read_text() -> JsValue;
   }
 
-  read_text()
-    .await
-    .unchecked_into::<js_sys::JsString>()
-    .into()
+  let text = read_text().await;
+
+  (!text.is_null()).then_some(text.unchecked_into::<js_sys::JsString>().into())
 }
 
 #[wasm_bindgen]
